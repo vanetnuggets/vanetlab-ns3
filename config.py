@@ -5,13 +5,15 @@ CONFIG = {
     0: {
       "id": 0,
       "color": "#00ff00",
-      "name": "LTE net",
+      "ssid": "LTE net",
+      "addr": "10.0.1.0/24",
       "type": "LTE"
     },
     1: {
       "id": 1,
       "color": "#0000ff",
-      "name": "Wifi net",
+      "ssid": "Wifi net",
+      "addr": "10.0.0.0/24",
       "type": "WIFI"
     }
   },
@@ -41,6 +43,38 @@ CONFIG = {
 			"l2": "lte",
 			"l2conf": {
         "type": "enb"
+			},
+			"l3": "client/server",
+			"l3conf": {
+				"prot": "udp/tcp",
+				"...": "..."
+			}
+		},
+    1: {
+      "id": 0,
+      "mobility": {
+        "type": "ns2",
+      },
+			"l2id": 1,
+			"l2": "wifi",
+			"l2conf": {
+        "type": "sta"
+			},
+			"l3": "client/server",
+			"l3conf": {
+				"prot": "udp/tcp",
+				"...": "..."
+			}
+		},
+    13: {
+      "id": 0,
+      "mobility": {
+        "type": "ns2",
+      },
+			"l2id": 1,
+			"l2": "wifi",
+			"l2conf": {
+        "type": "ap"
 			},
 			"l3": "client/server",
 			"l3conf": {
