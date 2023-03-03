@@ -1,14 +1,15 @@
-from ns.network import *
-from ns.lte import *
-from ns.wifi import *
-from ns.core import *
-from ns.mobility import MobilityHelper
+import ns.core
+import ns.wifi
+import ns.lte
+import ns.network
+
 from log_helper import dbg
 
 DEBUG = True
 
 class LteUtil:
   lte_helper = {}
+  epc_helper = {}
 
   enb_devs = {}
   ue_devs = {}
@@ -17,6 +18,10 @@ class LteUtil:
   enb_nodes = {}
 
   config = {}
+  bearer = {}
+
+  enbs = []
+  ues = []
 
   def __init__(self, config):
     self.config = config
@@ -34,12 +39,14 @@ class LteUtil:
     self.netmap = config['networks']
 
   def install(self, nodes):
+    self.enbs = []
+    self.ues = []
+
     for l2id in self.nodemap:
       # Ignore non-LTE networks
       if self.netmap[l2id]['type'] != 'LTE':
         continue
       
-
       enbs = []
       ues = []
 
@@ -60,15 +67,16 @@ class LteUtil:
         return
       dbg.log(f'parsed {len(enbs)} enb nodes and {len(ues)} ue nodes in network with id {l2id}.')
       
-      self.enb_nodes[l2id] = NodeContainer()
+      self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
         self.enb_nodes[l2id].Add(nodes.Get(enb_node))
 
-      self.lte_helper[l2id] = LteHelper()
+      self.lte_helper[l2id] = ns.lte.LteHelper()
+      
       self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
       dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
-      self.ue_nodes[l2id] = NodeContainer()
+      self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:
         self.ue_nodes[l2id].Add(nodes.Get(ue_node))
 
@@ -76,13 +84,32 @@ class LteUtil:
       
       dbg.log(f'installed {len(ues)} ue nodes in network with id {l2id}')
 
-      # If more than one ENB dev, soemhow choose, maybe from config ? 
-      self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
+      self.enbs += enbs
+      self.ues += ues
 
-      # TODO attach LTE enb nodes with p2p connection to the internet
+  def finish(self):
+    # assign ip address magic bullshit
+    # self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
-      dbg.log(f'configured LTE network with id {l2id}')
+    # # If more than one ENB dev, soemhow choose, maybe from config ? 
+    # self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
 
+    # self.bearer[l2id] = ns.lte.EpsBearer(ns.lte.EpsBearer.GBR_CONV_VOICE)
+    # self.lte_helper[l2id].ActivateDataRadioBearer(self.ue_devs[l2id], self.bearer[l2id])
+    for l2id in self.nodemap:
+      # Ignore non-LTE networks
+      if self.netmap[l2id]['type'] != 'LTE':
+        continue
+
+      self.epc_helper[l2id] = ns.lte.NoBackhaulEpcHelper()
+      self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
+      pgw = self.epc_helper[l2id].GetPgwNode()
+
+      self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
+
+
+    dbg.log(f'configured LTE network with id {l2id}')
+    
 class WifiUtil:
   wifi_helper = {}
 
@@ -93,6 +120,9 @@ class WifiUtil:
   sta_nodes = {}
   config = {}
 
+  stas = []
+  aps = []
+
   def __init__(self, config):
     self.config = config
     self.nodemap = {}
@@ -102,41 +132,37 @@ class WifiUtil:
         self.nodemap[l2id] = {}
       self.nodemap[l2id][node_id] = config['nodes'][node_id]
     self.netmap = config['networks']
+
+    self.chan = ns.wifi.YansWifiChannelHelper.Default()
+    self.phy = ns.wifi.YansWifiPhyHelper()
+    self.phy.SetChannel(self.chan.Create())
+    self.wifi = ns.wifi.WifiHelper()
+    self.mac = ns.wifi.WifiMacHelper()
+    self.ssid = None
   
   def setup_sta(self, l2id, ssid):
-    chan = YansWifiChannelHelper.Default()
-    phy = YansWifiPhyHelper.Default()
-    phy.SetChannel(chan.Create())
+    if self.ssid == None:
+      self.ssid = ns.wifi.Ssid (ssid)
 
-    wifi = WifiHelper()
-    wifi.SetRemoteStationManager("ns3::AarfWifiManager")
+    self.mac.SetType ("ns3::StaWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid), "ActiveProbing", ns.core.BooleanValue(False))
 
-    mac = WifiMacHelper()
-    ssid = Ssid (ssid)
-
-    mac.SetType ("ns3::StaWifiMac", "Ssid", SsidValue(ssid), "ActiveProbing", BooleanValue(False))
-
-    self.sta_devs[l2id] = wifi.Install(phy, mac, self.sta_nodes[l2id])
+    self.sta_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.sta_nodes[l2id])
     dbg.log(f'configured wifi sta nodes in network {l2id}')
 
   def setup_ap(self, l2id, ssid):
-    chan = YansWifiChannelHelper.Default()
-    phy = YansWifiPhyHelper.Default()
-    phy.SetChannel(chan.Create())
+    if self.ssid == None:
+      self.ssid = ns.wifi.Ssid (ssid)
 
-    wifi = WifiHelper()
-    wifi.SetRemoteStationManager("ns3::AarfWifiManager")
-
-    mac = WifiMacHelper()
-    ssid = Ssid (ssid)
-
-    mac.SetType ("ns3::StaWifiMac", "Ssid", SsidValue(ssid))
-
-    self.ap_devs[l2id] = wifi.Install(phy, mac, self.ap_nodes[l2id])
+    self.mac.SetType ("ns3::ApWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid))
+    
+    self.ap_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])
     dbg.log(f'configured wifi ap nodes in network {l2id}')
 
 
   def install(self, nodes):
+    self.aps = []
+    self.stas = []
+
     for l2id in self.netmap:
       # Ignore non-Wifi networks
       if self.netmap[l2id]['type'] != 'WIFI':
@@ -162,29 +188,32 @@ class WifiUtil:
 
       dbg.log(f'parsed {len(stas)} sta nodes and {len(aps)} ap nodes in network with id {l2id}.')
 
-      self.ap_nodes[l2id] = NodeContainer()
+      self.ap_nodes[l2id] = ns.network.NodeContainer()
       for ap_node in aps:
         self.ap_nodes[l2id].Add(nodes.Get(ap_node))
         
         # isntall AP nodes
-        ssid = self.netmap[l2id]['ssid']
-        self.setup_ap(l2id, ssid)
+      ssid = self.netmap[l2id]['ssid']
+      self.setup_ap(l2id, ssid)
 
       dbg.log(f'isntalled {len(aps)} ap nodes in network with id {l2id}')
 
-      self.sta_nodes[l2id] = NodeContainer()
+      self.sta_nodes[l2id] = ns.network.NodeContainer()
       for sta_node in stas:
         self.sta_nodes[l2id].Add(nodes.Get(sta_node))
         
-        # install STA nodes
-        ssid = self.netmap[l2id]['ssid']
-        self.setup_sta(l2id, ssid)
+      # install STA nodes
+      ssid = self.netmap[l2id]['ssid']
+      self.setup_sta(l2id, ssid)
 
       dbg.log(f'isntalled {len(stas)} sta nodes in network with id {l2id}')
 
       # attach stas to ap
 
       dbg.log(f'configured WIFI network with id {l2id}')
+
+      self.aps += aps
+      self.stas += stas
 
 class PhyUtil:
   def __init__(self, config):
@@ -194,6 +223,8 @@ class PhyUtil:
     self.wifi_util = WifiUtil(self.config)
 
   def install(self, nodes):
+    self.nodes = nodes
+
     dbg.log(f'installing LTE networks...')
     self.lte_util.install(nodes)
     dbg.log(f'installing Wifi networks...')
@@ -236,3 +267,8 @@ class PhyUtil:
 
     return devices
     
+  def get_enb_node_ids(self):
+    return self.lte_util.enbs
+  
+  def get_ap_node_ids(self):
+    return self.wifi_util.aps

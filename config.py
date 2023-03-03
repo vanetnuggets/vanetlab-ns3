@@ -13,13 +13,13 @@ CONFIG = {
       "id": 1,
       "color": "#0000ff",
       "ssid": "Wifi net",
-      "addr": "10.0.0.0/24",
+      "addr": "10.0.2.0/24",
       "type": "WIFI"
     }
   },
 	"nodes": {
-		0: {
-      "id": 0,
+		3: {
+      "id": 3,
       "mobility": {
         "type": "ns2",
       },
@@ -28,14 +28,22 @@ CONFIG = {
 			"l2conf": {
         "type": "ue"
 			},
-			"l3": "client/server",
-			"l3conf": {
-				"prot": "udp/tcp",
-				"...": "..."
-			}
+			"l3": None
 		},
-    12: {
-      "id": 0,
+		7: {
+      "id": 7,
+      "mobility": {
+        "type": "ns2",
+      },
+			"l2id": 0,
+			"l2": "lte",
+			"l2conf": {
+        "type": "ue"
+			},
+			"l3": None
+		},
+    13: {
+      "id": 13,
       "mobility": {
         "type": "ns2",
       },
@@ -44,14 +52,10 @@ CONFIG = {
 			"l2conf": {
         "type": "enb"
 			},
-			"l3": "client/server",
-			"l3conf": {
-				"prot": "udp/tcp",
-				"...": "..."
-			}
+			"l3": None
 		},
-    1: {
-      "id": 0,
+    4: {
+      "id": 4,
       "mobility": {
         "type": "ns2",
       },
@@ -60,14 +64,34 @@ CONFIG = {
 			"l2conf": {
         "type": "sta"
 			},
-			"l3": "client/server",
+			"l3": "udp_echo_server",
 			"l3conf": {
-				"prot": "udp/tcp",
-				"...": "..."
+				"port": 4242,
+				"start": 0,
+				"stop": 204
 			}
 		},
-    13: {
-      "id": 0,
+		5: {
+      "id": 5,
+      "mobility": {
+        "type": "ns2",
+      },
+			"l2id": 1,
+			"l2": "wifi",
+			"l2conf": {
+        "type": "sta"
+			},
+			"l3": "udp_echo_client",
+			"l3conf": {
+				"comm": 4,
+				"port": 4242,
+				"start": 0,
+				"stop": 204,
+				"max_packets": 204
+			}
+		},
+    12: {
+      "id": 12,
       "mobility": {
         "type": "ns2",
       },
@@ -76,11 +100,7 @@ CONFIG = {
 			"l2conf": {
         "type": "ap"
 			},
-			"l3": "client/server",
-			"l3conf": {
-				"prot": "udp/tcp",
-				"...": "..."
-			}
+			"l3": None
 		}
   }
 }
