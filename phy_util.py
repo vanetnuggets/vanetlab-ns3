@@ -1,3 +1,5 @@
+from ipaddress import IPv4Network
+
 import ns.core
 import ns.wifi
 import ns.lte
@@ -16,6 +18,7 @@ class LteUtil:
 
   ue_nodes = {}
   enb_nodes = {}
+  pgw_nodes = {}
 
   config = {}
   bearer = {}
@@ -23,9 +26,11 @@ class LteUtil:
   enbs = []
   ues = []
 
-  def __init__(self, config):
+  def __init__(self, config, ip_util):
     self.config = config
+    self.ip_util = ip_util
     self.nodemap = {}
+    
     for node_id in config['nodes']:
       l2type = config['nodes'][node_id]['l2']
       # ignore non-LTE nodes
@@ -51,6 +56,7 @@ class LteUtil:
       ues = []
 
       curr_nodes = self.nodemap[l2id]
+      
       for _node_id in curr_nodes:
         node = curr_nodes[_node_id]
 
@@ -67,49 +73,44 @@ class LteUtil:
         return
       dbg.log(f'parsed {len(enbs)} enb nodes and {len(ues)} ue nodes in network with id {l2id}.')
       
+      self.lte_helper[l2id] = ns.lte.LteHelper()
+      self.epc_helper[l2id] = ns.lte.PointToPointEpcHelper()
+      self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
+
+      pgw = self.epc_helper[l2id].GetPgwNode()
+      self.pgw_nodes[l2id] = pgw
+      self.ip_util.connect(pgw)
+      
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
         self.enb_nodes[l2id].Add(nodes.Get(enb_node))
 
-      self.lte_helper[l2id] = ns.lte.LteHelper()
-      
+      print('yea')
       self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
+      print('yea')
+
       dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
       self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:
         self.ue_nodes[l2id].Add(nodes.Get(ue_node))
 
+
       self.ue_devs[l2id] = self.lte_helper[l2id].InstallUeDevice(self.ue_nodes[l2id])
-      
       dbg.log(f'installed {len(ues)} ue nodes in network with id {l2id}')
+      for node_id in ues:
+        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(node_id)))
+
+      self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
+
+      self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
+      
+
 
       self.enbs += enbs
       self.ues += ues
 
-  def finish(self):
-    # assign ip address magic bullshit
-    # self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
-    # # If more than one ENB dev, soemhow choose, maybe from config ? 
-    # self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
-
-    # self.bearer[l2id] = ns.lte.EpsBearer(ns.lte.EpsBearer.GBR_CONV_VOICE)
-    # self.lte_helper[l2id].ActivateDataRadioBearer(self.ue_devs[l2id], self.bearer[l2id])
-    for l2id in self.nodemap:
-      # Ignore non-LTE networks
-      if self.netmap[l2id]['type'] != 'LTE':
-        continue
-
-      self.epc_helper[l2id] = ns.lte.NoBackhaulEpcHelper()
-      self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
-      pgw = self.epc_helper[l2id].GetPgwNode()
-
-      self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
-
-
-    dbg.log(f'configured LTE network with id {l2id}')
-    
 class WifiUtil:
   wifi_helper = {}
 
@@ -123,9 +124,11 @@ class WifiUtil:
   stas = []
   aps = []
 
-  def __init__(self, config):
+  def __init__(self, config, ip_util):
     self.config = config
     self.nodemap = {}
+    self.ip_util = ip_util
+
     for node_id in config['nodes']:
       l2id = config['nodes'][node_id]['l2id']
       if l2id not in self.nodemap:
@@ -135,29 +138,12 @@ class WifiUtil:
 
     self.chan = ns.wifi.YansWifiChannelHelper.Default()
     self.phy = ns.wifi.YansWifiPhyHelper()
+    self.phy.Set('TxGain', ns.core.DoubleValue(256))
+    self.phy.Set('RxGain', ns.core.DoubleValue(256))
     self.phy.SetChannel(self.chan.Create())
     self.wifi = ns.wifi.WifiHelper()
     self.mac = ns.wifi.WifiMacHelper()
     self.ssid = None
-  
-  def setup_sta(self, l2id, ssid):
-    if self.ssid == None:
-      self.ssid = ns.wifi.Ssid (ssid)
-
-    self.mac.SetType ("ns3::StaWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid), "ActiveProbing", ns.core.BooleanValue(False))
-
-    self.sta_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.sta_nodes[l2id])
-    dbg.log(f'configured wifi sta nodes in network {l2id}')
-
-  def setup_ap(self, l2id, ssid):
-    if self.ssid == None:
-      self.ssid = ns.wifi.Ssid (ssid)
-
-    self.mac.SetType ("ns3::ApWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid))
-    
-    self.ap_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])
-    dbg.log(f'configured wifi ap nodes in network {l2id}')
-
 
   def install(self, nodes):
     self.aps = []
@@ -191,10 +177,14 @@ class WifiUtil:
       self.ap_nodes[l2id] = ns.network.NodeContainer()
       for ap_node in aps:
         self.ap_nodes[l2id].Add(nodes.Get(ap_node))
-        
-        # isntall AP nodes
+      
+      # isntall AP nodes
       ssid = self.netmap[l2id]['ssid']
-      self.setup_ap(l2id, ssid)
+      if self.ssid == None:
+        self.ssid = ns.wifi.Ssid (ssid)
+
+      self.mac.SetType ("ns3::ApWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid))
+      self.ap_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])
 
       dbg.log(f'isntalled {len(aps)} ap nodes in network with id {l2id}')
 
@@ -204,23 +194,48 @@ class WifiUtil:
         
       # install STA nodes
       ssid = self.netmap[l2id]['ssid']
-      self.setup_sta(l2id, ssid)
+      self.mac.SetType ("ns3::StaWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid), "ActiveProbing", ns.core.BooleanValue(False))
+      self.sta_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.sta_nodes[l2id])
 
       dbg.log(f'isntalled {len(stas)} sta nodes in network with id {l2id}')
+      
+      # Install IP stack
+      for node_id in curr_nodes:
+        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(node_id)))
+      
+      addr = self.netmap[l2id]['addr']
 
-      # attach stas to ap
+      net_addr = IPv4Network(addr).network_address 
+      net_mask = IPv4Network(addr).netmask
+
+      address = ns.internet.Ipv4AddressHelper()
+      address.SetBase(
+        ns.network.Ipv4Address(net_addr),
+        ns.network.Ipv4Mask(net_mask)
+      )
+      
+      address.Assign(self.ap_devs[l2id])
+      address.Assign(self.sta_devs[l2id])
+
+      net_name = self.netmap[l2id]['ssid']
+      dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
+      
+      # p2p to main internet node from AP nodes
+      for ap in aps:
+        self.ip_util.connect(nodes.Get(ap))
+      dbg.log(f'AP nodes connected to internet backbone')
 
       dbg.log(f'configured WIFI network with id {l2id}')
-
       self.aps += aps
       self.stas += stas
 
 class PhyUtil:
-  def __init__(self, config):
+  def __init__(self, config, ip_util):
     self.config = config
+    self.ip_util = ip_util
 
-    self.lte_util = LteUtil(self.config)
-    self.wifi_util = WifiUtil(self.config)
+    self.lte_util = LteUtil(self.config, self.ip_util)
+    self.wifi_util = WifiUtil(self.config, self.ip_util)
 
   def install(self, nodes):
     self.nodes = nodes
@@ -234,20 +249,20 @@ class PhyUtil:
     devices = {}
 
     # get enb devices
-    for l2id in self.lte_util.enb_devs:
-      if l2id not in devices:
-        devices[l2id] = []
-      devices[l2id].append(
-        self.lte_util.enb_devs[l2id]
-      )
+    # for l2id in self.lte_util.enb_devs:
+    #   if l2id not in devices:
+    #     devices[l2id] = []
+    #   devices[l2id].append(
+    #     self.lte_util.enb_devs[l2id]
+    #   )
     
-    # get ue devices
-    for l2id in self.lte_util.ue_devs:
-      if l2id not in devices:
-        devices[l2id] = []
-      devices[l2id].append(
-        self.lte_util.ue_devs[l2id]
-      )
+    # # get ue devices
+    # for l2id in self.lte_util.ue_devs:
+    #   if l2id not in devices:
+    #     devices[l2id] = []
+    #   devices[l2id].append(
+    #     self.lte_util.ue_devs[l2id]
+    #   )
     
     # get spa devices
     for l2id in self.wifi_util.sta_devs:
@@ -272,3 +287,9 @@ class PhyUtil:
   
   def get_ap_node_ids(self):
     return self.wifi_util.aps
+  
+  def get_pgw_nodes(self):
+    arr = []
+    for l2id in self.lte_util.pgw_nodes:
+      arr.append(self.lte_util.pgw_nodes[l2id])
+    return arr

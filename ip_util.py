@@ -4,76 +4,56 @@ import ns.internet
 import ns.network
 import ns.point_to_point
 import ns.mobility
+import ns.olsr
 
 from log_helper import dbg
 
 class IpUtil:
   stack = {}
   netmap = {}
-  node = None
+  root = None
 
   def __init__(self, config):
     self.netmap = config['networks']
-    self.node = ns.network.NodeContainer()
-    self.node.Create(1)
+    self.root = ns.network.NodeContainer()
+    self.root.Create(1)
 
     self.mob = ns.mobility.MobilityHelper()
-    self.mob.Install(self.node)
+    self.mob.Install(self.root)
 
     self.connections = 1
     self.stack = ns.internet.InternetStackHelper()
-    self.stack.Install(self.node)
-    self.p2p_devs = []
-  
-  def assign_address(self, nodes, phy_util):
-    self.devices = phy_util.get_devices()
 
+    self.list = ns.internet.Ipv4ListRoutingHelper()
     
-    self.stack.Install(nodes)
+    self.olsr = ns.olsr.OlsrHelper()
+    self.static = ns.internet.Ipv4StaticRoutingHelper()
 
-    for l2id in self.devices:
-      addr = self.netmap[l2id]['addr']
+    self.list.Add(self.static, 0)
+    self.list.Add(self.olsr, 100)
 
-      net_addr = IPv4Network(addr).network_address 
-      net_mask = IPv4Network(addr).netmask
+    self.stack.SetRoutingHelper(self.list)
 
-      address = ns.internet.Ipv4AddressHelper()
-      address.SetBase(
-        ns.network.Ipv4Address(net_addr),
-        ns.network.Ipv4Mask(net_mask)
-      )
+    self.stack.Install(self.root)
+    self.p2p_devs = []
 
-      for net in self.devices[l2id]:
-        address.Assign(net)
-      
-      net_name = self.netmap[l2id]['ssid']
-      dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
+  def connect(self, node):
+    conn = ns.network.NodeContainer()
+    conn.Add(node)
+    conn.Add(self.root)
+    p2p = ns.point_to_point.PointToPointHelper()
+    p2p_dev = p2p.Install(conn)
 
-  def connect(self, nodes, node_ids):
-    for node_id in node_ids:
-      node = nodes.Get(node_id)
+    addr = f'10.{self.connections}.0.0'
+    mask = f'255.255.255.252'
 
-      conn = ns.network.NodeContainer()
-      conn.Add(node)
-      conn.Add(self.node)
-      p2p = ns.point_to_point.PointToPointHelper()
-      p2p_dev = p2p.Install(conn)
+    address = ns.internet.Ipv4AddressHelper()
+    address.SetBase(
+      ns.network.Ipv4Address(addr),
+      ns.network.Ipv4Mask(mask)
+    )
+    address.Assign(p2p_dev)
 
-      addr = f'10.{self.connections}.0.0'
-      mask = f'255.255.255.252'
-
-      address = ns.internet.Ipv4AddressHelper()
-      address.SetBase(
-        ns.network.Ipv4Address(addr),
-        ns.network.Ipv4Mask(mask)
-      )
-      address.Assign(p2p_dev)
-
-      self.p2p_devs.append(p2p_dev)
-      
-      self.connections += 1
-      dbg.log(f'node {node_id} connected to the internet')
+    self.p2p_devs.append(p2p_dev)
+    self.connections += 1
   
-  def populate(self):
-    ns.internet.Ipv4GlobalRoutingHelper.PopulateRoutingTables()
-    dbg.log(f'global routing table populated')

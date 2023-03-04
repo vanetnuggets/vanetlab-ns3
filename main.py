@@ -30,9 +30,6 @@ def main():
 	nodes = ns.network.NodeContainer()
 	nodes.Create(nnodes)
 
-	sumo_trace = ns.mobility.Ns2MobilityHelper(mobility_file) 
-	sumo_trace.Install()
-
 	# mobility = ns.mobility.MobilityHelper()
 	# mobility.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", ns.core.DoubleValue(0.0), 
 	# 							"MinY", ns.core.DoubleValue (0.0), "DeltaX", ns.core.DoubleValue(5.0), "DeltaY", ns.core.DoubleValue(10.0), 
@@ -41,22 +38,21 @@ def main():
 	# mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel", "Bounds", ns.mobility.RectangleValue(ns.mobility.Rectangle (-50, 50, -50, 50)))
 	# mobility.Install(nodes)
 
+	sumo_trace = ns.mobility.Ns2MobilityHelper(mobility_file) 
+	sumo_trace.Install()	
+
 	dbg.log('ns2 mobility configured')
 
-	phy_util = PhyUtil(CONFIG)
-	phy_util.install(nodes)
-
 	ip_util = IpUtil(CONFIG)
-	ip_util.assign_address(nodes, phy_util)
-	ip_util.connect(nodes, phy_util.get_enb_node_ids())
-	ip_util.connect(nodes, phy_util.get_ap_node_ids())
-	
 
-	ip_util.populate()
+	phy_util = PhyUtil(CONFIG, ip_util)
+	phy_util.install(nodes)
 
 	app_util = AppUtil(CONFIG)
 	app_util.install(nodes)
 
+	
+	
 	anim = ns.netanim.AnimationInterface('trace.xml');
 
 	ns.core.Simulator.Stop(ns.core.Seconds(204))

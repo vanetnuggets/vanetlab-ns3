@@ -17,40 +17,53 @@ CONFIG = {
       "type": "WIFI"
     }
   },
+	"max_at": 204.0,
 	"nodes": {
-		3: {
+  	3: {
       "id": 3,
       "mobility": {
-        "type": "ns2",
+				
       },
 			"l2id": 0,
 			"l2": "lte",
 			"l2conf": {
         "type": "ue"
 			},
-			"l3": None
+			"l3": "udp_echo_server",
+			"l3conf": {
+				"port": 4242,
+				"start": 0,
+				"stop": 204
+			}
 		},
 		7: {
       "id": 7,
       "mobility": {
-        "type": "ns2",
+        "type": "ns2"
       },
 			"l2id": 0,
 			"l2": "lte",
 			"l2conf": {
         "type": "ue"
 			},
-			"l3": None
+			"l3": "udp_echo_client",
+			"l3conf": {
+				"comm": 3,
+				"port": 4242,
+				"start": 0,
+				"stop": 204,
+				"max_packets": 204
+			}
 		},
-    13: {
-      "id": 13,
-      "mobility": {
-        "type": "ns2",
-      },
+		13: {
+			"id": 13,
+			"mobility": {
+				"type": "ns2",
+			},
 			"l2id": 0,
 			"l2": "lte",
 			"l2conf": {
-        "type": "enb"
+				"type": "enb"
 			},
 			"l3": None
 		},
@@ -93,7 +106,6 @@ CONFIG = {
     12: {
       "id": 12,
       "mobility": {
-        "type": "ns2",
       },
 			"l2id": 1,
 			"l2": "wifi",
@@ -104,4 +116,3 @@ CONFIG = {
 		}
   }
 }
-
