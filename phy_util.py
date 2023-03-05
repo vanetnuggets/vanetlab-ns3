@@ -83,7 +83,7 @@ class LteUtil:
       
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
-        self.enb_nodes[l2id].Add(nodes.Get(enb_node))
+        self.enb_nodes[l2id].Add(nodes.Get(int(enb_node)))
 
       print('yea')
       self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
@@ -93,13 +93,13 @@ class LteUtil:
 
       self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:
-        self.ue_nodes[l2id].Add(nodes.Get(ue_node))
+        self.ue_nodes[l2id].Add(nodes.Get(int(ue_node)))
 
 
       self.ue_devs[l2id] = self.lte_helper[l2id].InstallUeDevice(self.ue_nodes[l2id])
       dbg.log(f'installed {len(ues)} ue nodes in network with id {l2id}')
       for node_id in ues:
-        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(node_id)))
+        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
@@ -176,7 +176,7 @@ class WifiUtil:
 
       self.ap_nodes[l2id] = ns.network.NodeContainer()
       for ap_node in aps:
-        self.ap_nodes[l2id].Add(nodes.Get(ap_node))
+        self.ap_nodes[l2id].Add(nodes.Get(int(ap_node)))
       
       # isntall AP nodes
       ssid = self.netmap[l2id]['ssid']
@@ -190,7 +190,7 @@ class WifiUtil:
 
       self.sta_nodes[l2id] = ns.network.NodeContainer()
       for sta_node in stas:
-        self.sta_nodes[l2id].Add(nodes.Get(sta_node))
+        self.sta_nodes[l2id].Add(nodes.Get(int(sta_node)))
         
       # install STA nodes
       ssid = self.netmap[l2id]['ssid']
@@ -201,7 +201,7 @@ class WifiUtil:
       
       # Install IP stack
       for node_id in curr_nodes:
-        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(node_id)))
+        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
       
       addr = self.netmap[l2id]['addr']
 
