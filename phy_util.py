@@ -85,9 +85,7 @@ class LteUtil:
       for enb_node in enbs:
         self.enb_nodes[l2id].Add(nodes.Get(int(enb_node)))
 
-      print('yea')
       self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
-      print('yea')
 
       dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
@@ -207,11 +205,11 @@ class WifiUtil:
 
       net_addr = IPv4Network(addr).network_address 
       net_mask = IPv4Network(addr).netmask
-
+      
       address = ns.internet.Ipv4AddressHelper()
       address.SetBase(
-        ns.network.Ipv4Address(net_addr),
-        ns.network.Ipv4Mask(net_mask)
+        ns.network.Ipv4Address(str(net_addr)),
+        ns.network.Ipv4Mask(str(net_mask))
       )
       
       address.Assign(self.ap_devs[l2id])

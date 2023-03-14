@@ -31,7 +31,6 @@ class AppUtil:
         client.SetAttribute("MaxPackets", ns.core.UintegerValue(max_packets))
         
         app = client.Install(all_nodes.Get(int(node_id)))
-        print('isntalling CLIENT on', node_id, 'sending to', serv_id)
         app.Start(ns.core.Seconds(start))
         app.Stop(ns.core.Seconds(stop))
 

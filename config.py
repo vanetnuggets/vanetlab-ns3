@@ -1,4 +1,4 @@
-MOBILITY_TCL = '/home/ondro/skola/tp/sumo_to_ns3_py/ns2mobility.tcl'
+MOBILITY_TCL = '/home/gitter/vanetlab-be/scenarios/vienna-basic/mobility.tcl'
 CONFIG = {
   # Siete, aby sa v GUI dali vykreslit
   "networks": {
