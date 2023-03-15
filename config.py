@@ -1,4 +1,4 @@
-MOBILITY_TCL = '/home/gitter/vanetlab-be/scenarios/vienna-basic/mobility.tcl'
+MOBILITY_TCL = '/home/ondro/skola/tp/sumo_to_ns3_py/ns2mobility.tcl'
 CONFIG = {
   # Siete, aby sa v GUI dali vykreslit
   "networks": {
@@ -46,14 +46,7 @@ CONFIG = {
 			"l2conf": {
         "type": "ue"
 			},
-			"l3": "udp_echo_client",
-			"l3conf": {
-				"comm": 3,
-				"port": 4242,
-				"start": 0,
-				"stop": 204,
-				"max_packets": 204
-			}
+			"l3": None
 		},
 		13: {
 			"id": 13,
@@ -77,11 +70,13 @@ CONFIG = {
 			"l2conf": {
         "type": "sta"
 			},
-			"l3": "udp_echo_server",
+			"l3": "udp_echo_client",
 			"l3conf": {
+				"comm": 3,
 				"port": 4242,
 				"start": 0,
-				"stop": 204
+				"stop": 204,
+				"max_packets": 204
 			}
 		},
 		5: {
@@ -94,14 +89,7 @@ CONFIG = {
 			"l2conf": {
         "type": "sta"
 			},
-			"l3": "udp_echo_client",
-			"l3conf": {
-				"comm": 4,
-				"port": 4242,
-				"start": 0,
-				"stop": 204,
-				"max_packets": 204
-			}
+			"l3": None
 		},
     12: {
       "id": 12,

@@ -79,7 +79,11 @@ class LteUtil:
 
       pgw = self.epc_helper[l2id].GetPgwNode()
       self.pgw_nodes[l2id] = pgw
-      self.ip_util.connect(pgw)
+      iface = self.ip_util.connect(pgw)
+      
+      # TODO - niekedy tam mozno nebude 7.0.0.0 ked zistim jak sa to robi
+      # iface sa mozno bude kurvit nwm
+      self.ip_util.add_static("7.0.0.0", "255.0.0.0", iface)
       
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
@@ -175,7 +179,7 @@ class WifiUtil:
       self.ap_nodes[l2id] = ns.network.NodeContainer()
       for ap_node in aps:
         self.ap_nodes[l2id].Add(nodes.Get(int(ap_node)))
-      
+
       # isntall AP nodes
       ssid = self.netmap[l2id]['ssid']
       if self.ssid == None:

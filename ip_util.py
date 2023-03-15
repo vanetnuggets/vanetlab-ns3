@@ -56,4 +56,11 @@ class IpUtil:
 
     self.p2p_devs.append(p2p_dev)
     self.connections += 1
+    return self.connections - 1
   
+  def add_static(self, addr, mask, iface):
+    self.static.GetStaticRouting(self.root.Get(0).GetObject(ns.internet.Ipv4.GetTypeId())).AddNetworkRouteTo(
+      ns.network.Ipv4Address(addr),
+      ns.network.Ipv4Mask(mask),
+      iface
+    )

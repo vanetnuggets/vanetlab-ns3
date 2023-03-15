@@ -1,6 +1,8 @@
 import ns.applications
 import ns.core
 
+from dubak_translator import Lookup
+
 class AppUtil:
   config = {}
 
@@ -14,16 +16,23 @@ class AppUtil:
     for node_id in nodes:
       node = nodes[node_id]
 
+      print(node)
       if node['l3'] is None:
         continue
       
+      if node['l3'] not in Lookup:
+        dbg.err(f'app {node["l3"]} not implemented.')
+        continue
+
+      l3type = Lookup[node['l3']]
+
       l3conf = nodes[node_id]['l3conf']
-      if node['l3'] == 'udp_echo_client':
+      if l3type == 'udp_echo_client':
         serv_id = l3conf['comm']
-        port = l3conf['port']
-        start = l3conf['start']
-        stop = l3conf['stop']
-        max_packets = l3conf['max_packets']
+        port = int(l3conf['port'])
+        start = int(l3conf['start'])
+        stop = int(l3conf['stop'])
+        max_packets = int(l3conf['max_packets'])
 
         serv_addr = all_nodes.Get(int(serv_id)).GetObject(ns.internet.Ipv4.GetTypeId()).GetAddress(1,0).GetLocal()
         
@@ -39,10 +48,10 @@ class AppUtil:
           'a': app
         }
 
-      if node['l3'] == 'udp_echo_server':
-        port = l3conf['port']
-        start = l3conf['start']
-        stop = l3conf['stop']
+      if l3type == 'udp_echo_server':
+        port = int(l3conf['port'])
+        start = int(l3conf['start'])
+        stop = int(l3conf['stop'])
 
         server = ns.applications.UdpEchoServerHelper(port)
         app = server.Install(all_nodes.Get(int(node_id)))

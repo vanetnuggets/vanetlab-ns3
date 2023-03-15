@@ -57,7 +57,7 @@ def main(argv):
 
   dbg.log(f'ns2 mobility tcl parsed')
   dbg.log(f'number of nodes: {nnodes}, simulation time: {sim_time}')
-
+  
   nodes = ns.network.NodeContainer()
   nodes.Create(nnodes)
 
