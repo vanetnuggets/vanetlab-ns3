@@ -2,105 +2,145 @@ MOBILITY_TCL = '/home/ondro/skola/tp/sumo_to_ns3_py/ns2mobility.tcl'
 CONFIG = {
   # Siete, aby sa v GUI dali vykreslit
   "networks": {
-    0: {
+    "0": {
       "id": 0,
       "color": "#00ff00",
       "ssid": "LTE net",
       "addr": "10.0.1.0/24",
       "type": "LTE"
     },
-    1: {
+    "1": {
       "id": 1,
       "color": "#0000ff",
       "ssid": "Wifi net",
       "addr": "10.0.2.0/24",
       "type": "WIFI"
-    }
+    },
+		"2": {
+			"id": 2,
+			"color": "#ffff00",
+			"ssid": "Eth net",
+			"addr": "10.0.3.0/24",
+			"type": "ETH"
+		}
   },
 	"max_at": 204.0,
 	"nodes": {
-  	3: {
-      "id": 3,
-      "mobility": {
-				
-      },
-			"l2id": 0,
-			"l2": "lte",
-			"l2conf": {
-        "type": "ue"
-			},
-			"l3": "udp_echo_server",
-			"l3conf": {
-				"port": 4242,
-				"start": 0,
-				"stop": 204
-			}
-		},
-		7: {
-      "id": 7,
-      "mobility": {
-        "type": "ns2"
-      },
-			"l2id": 0,
+  	"1": {
+      "id": 1,
+      "mobility": {},
+			"l2id": "0",
 			"l2": "lte",
 			"l2conf": {
         "type": "ue"
 			},
 			"l3": None
 		},
-		13: {
-			"id": 13,
-			"mobility": {
-				"type": "ns2",
+		"2": {
+      "id": 2,
+      "mobility": {},
+			"l2id": "0",
+			"l2": "lte",
+			"l2conf": {
+        "type": "ue"
 			},
-			"l2id": 0,
+			"l3": None
+		},
+		"3": {
+			"id": 3,
+			"mobility": {},
+			"l2id": "0",
 			"l2": "lte",
 			"l2conf": {
 				"type": "enb"
 			},
 			"l3": None
 		},
-    4: {
+		"12": {
+			"id": 12,
+			"mobility": {},
+			"l2id": "0",
+			"l2": "lte",
+			"l2conf": {
+				"type": "pgw"
+			},
+			"l3": None
+		},
+    "4": {
       "id": 4,
-      "mobility": {
-        "type": "ns2",
-      },
-			"l2id": 1,
+      "mobility": {},
+			"l2id": "1",
 			"l2": "wifi",
 			"l2conf": {
         "type": "sta"
 			},
-			"l3": "udp_echo_client",
+			"l3": "udpclient",
 			"l3conf": {
-				"comm": 3,
+				"comm": "8",
 				"port": 4242,
 				"start": 0,
 				"stop": 204,
 				"max_packets": 204
 			}
 		},
-		5: {
+		"5": {
       "id": 5,
-      "mobility": {
-        "type": "ns2",
-      },
-			"l2id": 1,
+      "mobility": {},
+			"l2id": "1",
 			"l2": "wifi",
 			"l2conf": {
         "type": "sta"
 			},
 			"l3": None
 		},
-    12: {
-      "id": 12,
+    "6": {
+      "id": 6,
       "mobility": {
       },
-			"l2id": 1,
+			"l2id": "1",
 			"l2": "wifi",
 			"l2conf": {
         "type": "ap"
 			},
 			"l3": None
+		},
+		"7": {
+			"id": 7,
+			"mobility": {},
+			"l2id": "2",
+			"l2": "eth",
+			"l2conf": {},
+			"l3": None
+		},
+		"8": {
+			"id": 8,
+			"mobility": {},
+			"l2id": "2",
+			"l2": "eth",
+			"l2conf": {},
+			"l3": "udpserver",
+			"l3conf": {
+				"port": 4242,
+				"start": 0,
+				"stop": 204
+			}
+		},
+		"9": {
+			"id": 9,
+			"mobility": {},
+			"l2id": "2",
+			"l2": "eth",
+			"l2conf": {},
+			"l3": None
 		}
-  }
+  },
+	"connections": [{
+			"node_from": "12",
+			"node_to": "7",
+		}, {
+			"node_from": "9",
+			"node_to": "6"
+		}
+	],
+	"routing": "olsr"
 }

@@ -1,6 +1,5 @@
 from ns2_node_util import Ns2NodeUtility
-from phy_util import PhyUtil
-from ip_util import IpUtil
+
 
 import ns.core
 import ns.network
@@ -13,7 +12,11 @@ import sys, json
 from config import CONFIG, MOBILITY_TCL
 from log_helper import dbg
 
+from phy_util import PhyUtil
+from ip_util import IpUtil
 from app_util import AppUtil
+
+import context
 
 ns.core.LogComponentEnable("UdpEchoClientApplication", ns.core.LOG_LEVEL_INFO)
 ns.core.LogComponentEnable("UdpEchoServerApplication", ns.core.LOG_LEVEL_INFO)
@@ -42,12 +45,12 @@ def main(argv):
     mobility_file = MOBILITY_TCL
   
   if config == "":
-    config = CONFIG
+    context.config = CONFIG
   else:
     with open(config, 'r') as f:
-      config = json.loads(f.read())
+      context.config = json.loads(f.read())
   
-  sim_time = config['max_at']
+  sim_time = context.config['max_at']
   if validate != 0:
     sim_time = 1
 
@@ -58,8 +61,8 @@ def main(argv):
   dbg.log(f'ns2 mobility tcl parsed')
   dbg.log(f'number of nodes: {nnodes}, simulation time: {sim_time}')
   
-  nodes = ns.network.NodeContainer()
-  nodes.Create(nnodes)
+  context.nodes = ns.network.NodeContainer()
+  context.nodes.Create(nnodes)
 
   # mobility = ns.mobility.MobilityHelper()
   # mobility.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", ns.core.DoubleValue(0.0), 
@@ -74,13 +77,16 @@ def main(argv):
 
   dbg.log('ns2 mobility configured')
 
-  ip_util = IpUtil(config)
+  context.ip_util = IpUtil(context.config)
 
-  phy_util = PhyUtil(config, ip_util)
-  phy_util.install(nodes)
+  context.phy_util = PhyUtil(context.config, context.ip_util)
+  context.phy_util.install(context.nodes)
 
-  app_util = AppUtil(config)
-  app_util.install(nodes)
+  context.ip_util.install_connections()
+  
+  context.app_util = AppUtil(context.config)
+  context.app_util.install(context.nodes)
+  
   
   anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml');
 
@@ -90,3 +96,4 @@ def main(argv):
 
 if __name__ == '__main__':
   main(sys.argv)
+  exit(0)

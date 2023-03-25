@@ -4,10 +4,70 @@ import ns.core
 import ns.wifi
 import ns.lte
 import ns.network
+import ns.csma
+import ns.mobility
 
 from log_helper import dbg
 
 DEBUG = True
+
+class EthernetUtil:
+  eth_nodes = {}
+  eth_devs = {}
+
+  def __init__(self, config, ip_util):
+    self.config = config
+    self.ip_util = ip_util
+    self.nodemap = {}
+    
+    for node_id in config['nodes']:
+      l2type = config['nodes'][node_id]['l2']
+      # ignore non-LTE nodes
+      if l2type != "eth" and l2type != "ETH":
+        continue
+
+      l2id = config['nodes'][node_id]['l2id']
+      if l2id not in self.nodemap:
+        self.nodemap[l2id] = {}
+      self.nodemap[l2id][node_id] = config['nodes'][node_id]
+    self.netmap = config['networks']
+  
+  def install(self, nodes):
+
+    for l2id in self.nodemap:
+      l2type = self.netmap[l2id]['type'].lower()
+      if l2type != 'eth':
+        continue
+
+      self.eth_nodes[l2id] = ns.network.NodeContainer()
+      
+      curr_nodes = self.nodemap[l2id]
+      for _node_id in curr_nodes:
+        node_id = curr_nodes[_node_id]['id']
+        self.eth_nodes[l2id].Add(nodes.Get(node_id))
+      
+      csma = ns.csma.CsmaHelper()
+      self.eth_devs[l2id] = csma.Install(self.eth_nodes[l2id])
+
+      for node_id in curr_nodes:
+        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
+      
+      addr = self.netmap[l2id]['addr']
+
+      net_addr = IPv4Network(addr).network_address 
+      net_mask = IPv4Network(addr).netmask
+      
+      address = ns.internet.Ipv4AddressHelper()
+      address.SetBase(
+        ns.network.Ipv4Address(str(net_addr)),
+        ns.network.Ipv4Mask(str(net_mask))
+      )
+      
+      address.Assign(self.eth_devs[l2id])
+      net_name = self.netmap[l2id]['ssid']
+
+      dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
+      dbg.log(f'network {net_name} configured.')
 
 class LteUtil:
   lte_helper = {}
@@ -78,12 +138,18 @@ class LteUtil:
       self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
 
       pgw = self.epc_helper[l2id].GetPgwNode()
-      self.pgw_nodes[l2id] = pgw
-      iface = self.ip_util.connect(pgw)
+      
+      pgw_nodes = ns.network.NodeContainer()
+      pgw_nodes.Add(pgw)
+
+      # TODO add constant position to PGW node from `mobility` attribute
+
+      self.pgw_nodes[l2id] = pgw_nodes
+      # iface = self.ip_util.connect(pgw)
       
       # TODO - niekedy tam mozno nebude 7.0.0.0 ked zistim jak sa to robi
       # iface sa mozno bude kurvit nwm
-      self.ip_util.add_static("7.0.0.0", "255.0.0.0", iface)
+      # self.ip_util.add_static("7.0.0.0", "255.0.0.0", iface)
       
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
@@ -104,13 +170,12 @@ class LteUtil:
         self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
-
       self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
       
-
-
       self.enbs += enbs
       self.ues += ues
+
+      dbg.log(f'configured LTE network')
 
 
 class WifiUtil:
@@ -222,11 +287,6 @@ class WifiUtil:
       net_name = self.netmap[l2id]['ssid']
       dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
       
-      # p2p to main internet node from AP nodes
-      for ap in aps:
-        self.ip_util.connect(nodes.Get(ap))
-      dbg.log(f'AP nodes connected to internet backbone')
-
       dbg.log(f'configured WIFI network with id {l2id}')
       self.aps += aps
       self.stas += stas
@@ -238,34 +298,23 @@ class PhyUtil:
 
     self.lte_util = LteUtil(self.config, self.ip_util)
     self.wifi_util = WifiUtil(self.config, self.ip_util)
+    self.eth_util = EthernetUtil(self.config, self.ip_util)
 
   def install(self, nodes):
     self.nodes = nodes
 
     dbg.log(f'installing LTE networks...')
     self.lte_util.install(nodes)
+
     dbg.log(f'installing Wifi networks...')
     self.wifi_util.install(nodes)
+
+    dbg.log(f'installing Eth networks...')
+    self.eth_util.install(nodes)
   
   def get_devices(self):
     devices = {}
 
-    # get enb devices
-    # for l2id in self.lte_util.enb_devs:
-    #   if l2id not in devices:
-    #     devices[l2id] = []
-    #   devices[l2id].append(
-    #     self.lte_util.enb_devs[l2id]
-    #   )
-    
-    # # get ue devices
-    # for l2id in self.lte_util.ue_devs:
-    #   if l2id not in devices:
-    #     devices[l2id] = []
-    #   devices[l2id].append(
-    #     self.lte_util.ue_devs[l2id]
-    #   )
-    
     # get spa devices
     for l2id in self.wifi_util.sta_devs:
       if l2id not in devices:
@@ -295,3 +344,6 @@ class PhyUtil:
     for l2id in self.lte_util.pgw_nodes:
       arr.append(self.lte_util.pgw_nodes[l2id])
     return arr
+  
+  def get_pgw_node(self, l2id):
+    return self.lte_util.pgw_nodes[l2id].Get(0)

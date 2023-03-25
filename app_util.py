@@ -16,7 +16,6 @@ class AppUtil:
     for node_id in nodes:
       node = nodes[node_id]
 
-      print(node)
       if node['l3'] is None:
         continue
       
