@@ -20,6 +20,8 @@ import context
 
 ns.core.LogComponentEnable("UdpEchoClientApplication", ns.core.LOG_LEVEL_INFO)
 ns.core.LogComponentEnable("UdpEchoServerApplication", ns.core.LOG_LEVEL_INFO)
+ns.core.LogComponentEnable("BulkSendApplication", ns.core.LOG_LEVEL_INFO)
+ns.core.LogComponentEnable("PacketSink", ns.core.LOG_LEVEL_INFO)
 
 def main(argv):
   cmd = ns.core.CommandLine()

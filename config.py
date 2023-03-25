@@ -74,13 +74,13 @@ CONFIG = {
 			"l2conf": {
         "type": "sta"
 			},
-			"l3": "udpclient",
+			"l3": "tcpclient",
 			"l3conf": {
 				"comm": "8",
 				"port": 4242,
 				"start": 0,
 				"stop": 204,
-				"max_packets": 204
+				"max_bytes": 2500
 			}
 		},
 		"5": {
@@ -118,7 +118,7 @@ CONFIG = {
 			"l2id": "2",
 			"l2": "eth",
 			"l2conf": {},
-			"l3": "udpserver",
+			"l3": "tcpserver",
 			"l3conf": {
 				"port": 4242,
 				"start": 0,

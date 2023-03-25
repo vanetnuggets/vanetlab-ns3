@@ -5,6 +5,8 @@ from dubak_translator import Lookup
 from application.tcp import TcpUtil
 from application.udp import UdpUtil
 
+from log_helper import dbg
+
 class AppUtil:
   config = {}
 
@@ -34,5 +36,8 @@ class AppUtil:
       if l3type == 'udp_echo_server':
         self.udp_helper.add_server(all_nodes, node, l3conf)
       
-
-        
+      if l3type == 'tcp_client':
+        self.tcp_helper.add_client(all_nodes, node, l3conf)
+      
+      elif l3type == 'tcp_server':
+        self.tcp_helper.add_server(all_nodes, node, l3conf)
