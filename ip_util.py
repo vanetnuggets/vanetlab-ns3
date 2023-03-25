@@ -52,6 +52,7 @@ class IpUtil:
     self.list.Add(self._routing, 100)
 
     self.stack.SetRoutingHelper(self.list)
+    dbg.log(f'installed {routing} routing protocol.')
   
   def connect(self, node_from, node_to):
     _node_from = node_from
