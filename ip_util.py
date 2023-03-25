@@ -5,6 +5,8 @@ import ns.network
 import ns.point_to_point
 import ns.mobility
 import ns.olsr
+import ns.aodv
+import ns.dsdv
 
 from log_helper import dbg
 import context
@@ -12,6 +14,7 @@ import context
 class IpUtil:
   stack = {}
   netmap = {}
+  _routing = None
 
   def __init__(self, config):
     self.netmap = config['networks']
@@ -20,22 +23,35 @@ class IpUtil:
     self.mob = ns.mobility.MobilityHelper()
     self.connections = 1
     self.stack = ns.internet.InternetStackHelper()
-
-    self.list = ns.internet.Ipv4ListRoutingHelper()
-    
-    self.olsr = ns.olsr.OlsrHelper()
-    self.static = ns.internet.Ipv4StaticRoutingHelper()
-
-    self.list.Add(self.static, 0)
-    self.list.Add(self.olsr, 100)
-
-    self.stack.SetRoutingHelper(self.list)
-
+    self._set_routing()
     self.p2p_devs = []
   
   def _set_routing(self):
+    self.list = ns.internet.Ipv4ListRoutingHelper()
     
-    pass
+    if 'routing' not in self.config:
+      dbg.log(f'no routing protocol specified, defaulting to `olsr`')
+      routing = 'olsr'
+    
+    routing = self.config['routing'].lower()
+    if routing not in ['olsr', 'aodv', 'dsdv']:
+      dbg.err(f"invalid routing protocol - {routing}")
+      exit(-1)
+
+    if routing == 'olsr':
+      self._routing = ns.olsr.OlsrHelper()
+    
+    elif routing == 'aodv':
+      self._routing = ns.aodv.AodvHelper()
+    
+    elif routing == 'dsdv':
+      self._routing = ns.dsdv.DsdvHelper()
+
+    self.static = ns.internet.Ipv4StaticRoutingHelper()
+    self.list.Add(self.static, 0)
+    self.list.Add(self._routing, 100)
+
+    self.stack.SetRoutingHelper(self.list)
   
   def connect(self, node_from, node_to):
     _node_from = node_from
