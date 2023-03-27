@@ -16,7 +16,7 @@ class UdpUtil:
 
     serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(serv_id  ))).GetAddress(1,0).GetLocal()
     
-    client = ns.applications.UdpEchoClientHelper(serv_addr, port)
+    client = ns.applications.UdpEchoClientHelper(serv_addr.ConvertTo(), port)
     client.SetAttribute("MaxPackets", ns.core.UintegerValue(max_packets))
     
     app = client.Install(nodes.Get(int(node_id)))
