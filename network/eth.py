@@ -1,8 +1,6 @@
 from ipaddress import IPv4Network
 
-import ns.core
-import ns.network
-import ns.csma
+from ns import ns
 
 from log_helper import dbg
 

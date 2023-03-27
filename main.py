@@ -1,14 +1,10 @@
 from ns2_node_util import Ns2NodeUtility
 
-
-import ns.core
-import ns.network
-import ns.mobility
-import ns.applications
-import ns.netanim
+from ns import ns
 
 import sys, json
 
+from argparse import ArgumentParser
 from config import CONFIG, MOBILITY_TCL
 from log_helper import dbg
 
@@ -24,29 +20,28 @@ ns.core.LogComponentEnable("BulkSendApplication", ns.core.LOG_LEVEL_INFO)
 ns.core.LogComponentEnable("PacketSink", ns.core.LOG_LEVEL_INFO)
 
 def main(argv):
-  cmd = ns.core.CommandLine()
-  
-  cmd.config = ""
-  cmd.mobility = ""
-  cmd.traceloc = "."
-  cmd.validate = 0
+  parser = ArgumentParser(
+    prog='VanetLab ns3 scenario maker',
+    description='complex ns3 scenario maker backend for VanetLab',
+    epilog='caw'
+  )
+  parser.add_argument('-c', '--config')
+  parser.add_argument('-m', '--mobility')
+  parser.add_argument('-t', '--traceloc')
+  parser.add_argument('-v', '--validate')
 
-  cmd.AddValue("config", "VanetLab config to load")
-  cmd.AddValue("mobility", "ns2 mobility tcl to use")
-  cmd.AddValue("traceloc", "path where netanim trace should be saved")
-  cmd.AddValue("validate", "only validates the scenario if true")
+  args = parser.parse_args()
 
-  cmd.Parse(sys.argv)
+  mobility_file = str(args.mobility) if args.mobility is not None else None
+  config = str(args.config) if args.config is not None else None
+  traceloc = str(args.traceloc) if args.traceloc is not None else '.'
+  validate = int(args.validate) if args.validate is not None else 0
 
-  mobility_file = str(cmd.mobility)
-  config = str(cmd.config)
-  traceloc = str(cmd.traceloc)
-  validate = int(cmd.validate)
-
-  if mobility_file == "":
+  if mobility_file == None:
     mobility_file = MOBILITY_TCL
   
-  if config == "":
+  print(config, mobility_file, traceloc, validate)
+  if config is None:
     context.config = CONFIG
   else:
     with open(config, 'r') as f:

@@ -1,5 +1,4 @@
-import ns.applications
-import ns.core
+
 
 class TcpUtil:
   clients = {}
@@ -17,9 +16,9 @@ class TcpUtil:
     stop = int(conf['stop'])
     max_bytes = int(conf['max_bytes'])
 
-    serv_addr = nodes.Get(int(serv_id)).GetObject(ns.internet.Ipv4.GetTypeId()).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(serv_id  ))).GetAddress(1,0).GetLocal()
     
-    client = ns.applications.BulkSendHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port))
+    client = ns.applications.BulkSendHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port).ConvertTo())
     client.SetAttribute("MaxBytes", ns.core.UintegerValue(max_bytes))
     
     app = client.Install(nodes.Get(int(node_id)))
@@ -38,9 +37,9 @@ class TcpUtil:
     start = int(conf['start'])
     stop = int(conf['stop'])
 
-    serv_addr = nodes.Get(int(node_id)).GetObject(ns.internet.Ipv4.GetTypeId()).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(node_id  ))).GetAddress(1,0).GetLocal()
     
-    server = ns.applications.PacketSinkHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port))
+    server = ns.applications.PacketSinkHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port).ConvertTo())
     app = server.Install(nodes.Get(int(node_id)))
     app.Start(ns.core.Seconds(start))
     app.Stop(ns.core.Seconds(stop))

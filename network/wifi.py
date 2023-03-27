@@ -1,9 +1,6 @@
 from ipaddress import IPv4Network
 
-import ns.core
-import ns.wifi
-import ns.network
-import ns.mobility
+from ns import ns
 
 from log_helper import dbg
 

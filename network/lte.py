@@ -1,9 +1,6 @@
 from ipaddress import IPv4Network
 
-import ns.core
-import ns.lte
-import ns.network
-import ns.mobility
+from ns import ns
 
 from log_helper import dbg
 
@@ -71,20 +68,17 @@ class LteUtil:
         return
       dbg.log(f'parsed {len(enbs)} enb nodes and {len(ues)} ue nodes in network with id {l2id}.')
       
+
       self.lte_helper[l2id] = ns.lte.LteHelper()
       self.epc_helper[l2id] = ns.lte.PointToPointEpcHelper()
       self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
-
       pgw = self.epc_helper[l2id].GetPgwNode()
-      
       pgw_nodes = ns.network.NodeContainer()
       pgw_nodes.Add(pgw)
-
       # TODO add constant position to PGW node from `mobility` attribute
 
       self.pgw_nodes[l2id] = pgw_nodes
       # iface = self.ip_util.connect(pgw)
-      
       # TODO - niekedy tam mozno nebude 7.0.0.0 ked zistim jak sa to robi
       # iface sa mozno bude kurvit nwm
       # self.ip_util.add_static("7.0.0.0", "255.0.0.0", iface)
@@ -92,10 +86,9 @@ class LteUtil:
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
         self.enb_nodes[l2id].Add(nodes.Get(int(enb_node)))
+      # self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
 
-      self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
-
-      dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
+      # dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
       self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:

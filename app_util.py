@@ -1,5 +1,4 @@
-import ns.applications
-import ns.core
+from ns import ns
 
 from dubak_translator import Lookup
 from application.tcp import TcpUtil

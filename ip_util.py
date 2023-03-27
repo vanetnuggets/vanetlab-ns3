@@ -1,12 +1,6 @@
 from ipaddress import IPv4Network
 
-import ns.internet
-import ns.network
-import ns.point_to_point
-import ns.mobility
-import ns.olsr
-import ns.aodv
-import ns.dsdv
+from ns import ns
 
 from log_helper import dbg
 import context
@@ -73,7 +67,10 @@ class IpUtil:
     node_from_conf = self.config['nodes'][str(node_from)]
     if 'type' in node_from_conf['l2conf'] and node_from_conf['l2conf']['type'] == 'pgw':
       l2id = node_from_conf['l2id']
+      # TODO FIX LTE
+      return
       node_from = context.phy_util.get_pgw_node(l2id)
+      
     else:
       node_from = context.nodes.Get(node_from)
     

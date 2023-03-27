@@ -1,6 +1,3 @@
-import ns.applications
-import ns.core
-
 class UdpUtil:
   clients = {}
   servers = {}
@@ -17,7 +14,7 @@ class UdpUtil:
     stop = int(conf['stop'])
     max_packets = int(conf['max_packets'])
 
-    serv_addr = nodes.Get(int(serv_id)).GetObject(ns.internet.Ipv4.GetTypeId()).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(serv_id  ))).GetAddress(1,0).GetLocal()
     
     client = ns.applications.UdpEchoClientHelper(serv_addr, port)
     client.SetAttribute("MaxPackets", ns.core.UintegerValue(max_packets))
