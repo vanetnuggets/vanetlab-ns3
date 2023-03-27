@@ -20,8 +20,8 @@ class PhyUtil:
   def install(self, nodes):
     self.nodes = nodes
 
-    # dbg.log(f'installing LTE networks...')
-    # self.lte_util.install(nodes)
+    dbg.log(f'installing LTE networks...')
+    self.lte_util.install(nodes)
 
     dbg.log(f'installing Wifi networks...')
     self.wifi_util.install(nodes)

@@ -69,7 +69,7 @@ class LteUtil:
       dbg.log(f'parsed {len(enbs)} enb nodes and {len(ues)} ue nodes in network with id {l2id}.')
       
 
-      self.lte_helper[l2id] = ns.lte.LteHelper()
+      self.lte_helper[l2id] = ns.cppyy.gbl.createLteHelper()
       self.epc_helper[l2id] = ns.lte.PointToPointEpcHelper()
       self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
       pgw = self.epc_helper[l2id].GetPgwNode()
@@ -86,9 +86,9 @@ class LteUtil:
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
         self.enb_nodes[l2id].Add(nodes.Get(int(enb_node)))
-      # self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
+      self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
 
-      # dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
+      dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
       self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:

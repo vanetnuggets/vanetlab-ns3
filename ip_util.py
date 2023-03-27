@@ -67,8 +67,6 @@ class IpUtil:
     node_from_conf = self.config['nodes'][str(node_from)]
     if 'type' in node_from_conf['l2conf'] and node_from_conf['l2conf']['type'] == 'pgw':
       l2id = node_from_conf['l2id']
-      # TODO FIX LTE
-      return
       node_from = context.phy_util.get_pgw_node(l2id)
       
     else:
