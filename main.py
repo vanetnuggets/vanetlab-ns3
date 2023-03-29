@@ -48,6 +48,8 @@ def main(argv):
       context.config = json.loads(f.read())
   
   sim_time = context.config['max_at']
+  context.init()
+  
   if validate != 0:
     sim_time = 1
 

@@ -1,8 +1,9 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
-
-from ns import ns
-
 from log_helper import dbg
+import context
 
 class EthernetUtil:
   eth_nodes = {}
@@ -31,19 +32,23 @@ class EthernetUtil:
       l2type = self.netmap[l2id]['type'].lower()
       if l2type != 'eth':
         continue
+      
+      curr_network = self.netmap[l2id]
 
       self.eth_nodes[l2id] = ns.network.NodeContainer()
       
       curr_nodes = self.nodemap[l2id]
       for _node_id in curr_nodes:
         node_id = curr_nodes[_node_id]['id']
-        self.eth_nodes[l2id].Add(nodes.Get(node_id))
+        self.eth_nodes[l2id].Add(context.get_node_for_id(node_id))
       
       csma = ns.csma.CsmaHelper()
+      attribute_manager.install_attributes(curr_network, csma, 'SetAttribute')
+
       self.eth_devs[l2id] = csma.Install(self.eth_nodes[l2id])
 
       for node_id in curr_nodes:
-        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
+        self.ip_util.stack.Install(ns.network.NodeContainer(context.get_node_for_id(int(node_id))))
       
       addr = self.netmap[l2id]['addr']
 

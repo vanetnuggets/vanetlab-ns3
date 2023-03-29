@@ -1,6 +1,13 @@
 from ipaddress import IPv4Network
 
-from ns import ns
+from ns import *
+# ns.cppyy.cppdef("""
+# using namespace ns3;
+
+# Ptr<Ipv4> _getNodeIpv4(Ptr<Node> node) { 
+#   return node->GetObject<Ipv4>(); 
+# };
+# """)
 
 from log_helper import dbg
 import context
@@ -64,21 +71,37 @@ class IpUtil:
       dbg.err(f'node {node_to} does not exist')
       return
     
+    from_pgw = False
+    to_pgw = False
+
     node_from_conf = self.config['nodes'][str(node_from)]
     if 'type' in node_from_conf['l2conf'] and node_from_conf['l2conf']['type'] == 'pgw':
       l2id = node_from_conf['l2id']
       node_from = context.phy_util.get_pgw_node(l2id)
-      
+      from_pgw = True
     else:
-      node_from = context.nodes.Get(node_from)
+      node_from = context.get_node_for_id(node_from)
     
     node_to_conf = self.config['nodes'][str(node_to)]
     if 'type' in node_to_conf['l2conf'] and node_to_conf['l2conf']['type'] == 'pgw':
       l2id = node_from_conf['l2id']
       node_to = context.phy_util.get_pgw_node(l2id)
+      to_pgw = True
     else:
-      node_to = context.nodes.Get(node_to)
-    
+      node_to = context.get_node_for_id(node_to)
+
+    if from_pgw or to_pgw:
+      relevant_node = node_from
+      if to_pgw:
+        relevant_node = node_to
+      relevant_node_static_routing = self.static.GetStaticRouting(ns.cppyy.gbl.getNodeIpv4(relevant_node))
+      relevant_node_static_routing.AddNetworkRouteTo(
+        ns.network.Ipv4Address("7.0.0.0"),
+        ns.network.Ipv4Mask("255.0.0.0"), 
+        1
+      )
+      dbg.log('added static routing on ')
+
     conn = ns.network.NodeContainer()
     conn.Add(node_from)
     conn.Add(node_to)

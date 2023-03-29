@@ -1,8 +1,9 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
-
-from ns import ns
-
 from log_helper import dbg
+import context
 
 class WifiUtil:
   wifi_helper = {}
@@ -31,8 +32,8 @@ class WifiUtil:
 
     self.chan = ns.wifi.YansWifiChannelHelper.Default()
     self.phy = ns.wifi.YansWifiPhyHelper()
-    self.phy.Set('TxGain', ns.core.DoubleValue(256))
-    self.phy.Set('RxGain', ns.core.DoubleValue(256))
+    # self.phy.Set('TxGain', ns.core.DoubleValue(256))
+    # self.phy.Set('RxGain', ns.core.DoubleValue(256))
     self.phy.SetChannel(self.chan.Create())
     self.wifi = ns.wifi.WifiHelper()
     self.mac = ns.wifi.WifiMacHelper()
@@ -69,7 +70,7 @@ class WifiUtil:
 
       self.ap_nodes[l2id] = ns.network.NodeContainer()
       for ap_node in aps:
-        self.ap_nodes[l2id].Add(nodes.Get(int(ap_node)))
+        self.ap_nodes[l2id].Add(context.get_node_for_id(ap_node))
 
       # isntall AP nodes
       ssid = self.netmap[l2id]['ssid']
@@ -77,24 +78,42 @@ class WifiUtil:
         self.ssid = ns.wifi.Ssid (ssid)
 
       self.mac.SetType ("ns3::ApWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid))
-      self.ap_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])
+      self.ap_devs[l2id] = ns.network.NetDeviceContainer()
+      
+      for node_id in aps:
+        node = curr_nodes[str(node_id)]
+
+        attribute_manager.install_attributes(node, self.phy)
+        
+        # install device
+        ap_dev = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])
+        self.ap_devs[l2id].Add(ap_dev)
+
+        attribute_manager.clear_attributes(node, self.phy)
 
       dbg.log(f'isntalled {len(aps)} ap nodes in network with id {l2id}')
 
       self.sta_nodes[l2id] = ns.network.NodeContainer()
       for sta_node in stas:
-        self.sta_nodes[l2id].Add(nodes.Get(int(sta_node)))
+        self.sta_nodes[l2id].Add(context.get_node_for_id(sta_node))
         
       # install STA nodes
       ssid = self.netmap[l2id]['ssid']
       self.mac.SetType ("ns3::StaWifiMac", "Ssid", ns.wifi.SsidValue(self.ssid), "ActiveProbing", ns.core.BooleanValue(False))
-      self.sta_devs[l2id] = self.wifi.Install(self.phy, self.mac, self.sta_nodes[l2id])
+      
+      self.sta_devs[l2id] = ns.network.NetDeviceContainer()
+      for node_id in stas:
+        node = curr_nodes[str(node_id)]
+        attribute_manager.install_attributes(node, self.phy)
+        sta_dev = self.wifi.Install(self.phy, self.mac, self.sta_nodes[l2id])
+        self.sta_devs[l2id].Add(sta_dev)
+        attribute_manager.clear_attributes(node, self.phy)
 
       dbg.log(f'isntalled {len(stas)} sta nodes in network with id {l2id}')
       
       # Install IP stack
       for node_id in curr_nodes:
-        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
+        self.ip_util.stack.Install(ns.network.NodeContainer(context.get_node_for_id(node_id)))
       
       addr = self.netmap[l2id]['addr']
 

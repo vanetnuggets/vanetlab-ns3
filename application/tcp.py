@@ -16,12 +16,12 @@ class TcpUtil:
     stop = int(conf['stop'])
     max_bytes = int(conf['max_bytes'])
 
-    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(serv_id  ))).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(serv_id)).GetAddress(1,0).GetLocal()
     
     client = ns.applications.BulkSendHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port).ConvertTo())
-    client.SetAttribute("MaxBytes", ns.core.UintegerValue(max_bytes))
+    attribute_manager.install_attributes(conf, client, method='SetAttribute')
     
-    app = client.Install(nodes.Get(int(node_id)))
+    app = client.Install(context.get_node_for_id(node_id))
     app.Start(ns.core.Seconds(start))
     app.Stop(ns.core.Seconds(stop))
 
@@ -37,10 +37,10 @@ class TcpUtil:
     start = int(conf['start'])
     stop = int(conf['stop'])
 
-    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(node_id  ))).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(node_id)).GetAddress(1,0).GetLocal()
     
     server = ns.applications.PacketSinkHelper("ns3::TcpSocketFactory", ns.network.InetSocketAddress(serv_addr, port).ConvertTo())
-    app = server.Install(nodes.Get(int(node_id)))
+    app = server.Install(context.get_node_for_id(node_id))
     app.Start(ns.core.Seconds(start))
     app.Stop(ns.core.Seconds(stop))
 

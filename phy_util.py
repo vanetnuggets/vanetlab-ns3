@@ -20,8 +20,8 @@ class PhyUtil:
   def install(self, nodes):
     self.nodes = nodes
 
-    dbg.log(f'installing LTE networks...')
-    self.lte_util.install(nodes)
+    # dbg.log(f'installing LTE networks...')
+    # self.lte_util.install(nodes)
 
     dbg.log(f'installing Wifi networks...')
     self.wifi_util.install(nodes)
@@ -64,7 +64,7 @@ class PhyUtil:
   
   def get_pgw_node(self, l2id):
     try:
-      node = self.lte_util.pgw_nodes[l2id].Get(0)
+      node = self.lte_util.pgw_nodes[str(l2id)].Get(0)
       return node
     except KeyError as e:
       return None

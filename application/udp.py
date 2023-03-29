@@ -14,12 +14,13 @@ class UdpUtil:
     stop = int(conf['stop'])
     max_packets = int(conf['max_packets'])
 
-    serv_addr = ns.cppyy.gbl.getNodeIpv4(nodes.Get(int(serv_id  ))).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(node_id)).GetAddress(1,0).GetLocal()
     
     client = ns.applications.UdpEchoClientHelper(serv_addr.ConvertTo(), port)
-    client.SetAttribute("MaxPackets", ns.core.UintegerValue(max_packets))
     
-    app = client.Install(nodes.Get(int(node_id)))
+    attribute_manager.install_attributes(conf, client, method='SetAttribute')
+    
+    app = client.Install(context.get_node_for_id(node_id))
     app.Start(ns.core.Seconds(start))
     app.Stop(ns.core.Seconds(stop))
 
@@ -36,7 +37,7 @@ class UdpUtil:
     stop = int(conf['stop'])
 
     server = ns.applications.UdpEchoServerHelper(port)
-    app = server.Install(nodes.Get(int(node_id)))
+    app = server.Install(context.get_node_for_id(node_id))
     app.Start(ns.core.Seconds(start))
     app.Stop(ns.core.Seconds(stop))
 

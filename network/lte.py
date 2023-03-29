@@ -1,8 +1,9 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
-
-from ns import ns
-
 from log_helper import dbg
+import context
 
 class LteUtil:
   lte_helper = {}
@@ -81,26 +82,30 @@ class LteUtil:
       # iface = self.ip_util.connect(pgw)
       # TODO - niekedy tam mozno nebude 7.0.0.0 ked zistim jak sa to robi
       # iface sa mozno bude kurvit nwm
-      # self.ip_util.add_static("7.0.0.0", "255.0.0.0", iface)
-      
+
       self.enb_nodes[l2id] = ns.network.NodeContainer()
       for enb_node in enbs:
-        self.enb_nodes[l2id].Add(nodes.Get(int(enb_node)))
+        self.enb_nodes[l2id].Add(context.get_node_for_id(enb_node))
       self.enb_devs[l2id] = self.lte_helper[l2id].InstallEnbDevice(self.enb_nodes[l2id])
 
       dbg.log(f'installed {len(enbs)} enb nodes in network with id {l2id}')
 
       self.ue_nodes[l2id] = ns.network.NodeContainer()
       for ue_node in ues:
-        self.ue_nodes[l2id].Add(nodes.Get(int(ue_node)))
+        self.ue_nodes[l2id].Add(context.get_node_for_id(ue_node))
 
 
       self.ue_devs[l2id] = self.lte_helper[l2id].InstallUeDevice(self.ue_nodes[l2id])
       dbg.log(f'installed {len(ues)} ue nodes in network with id {l2id}')
       for node_id in ues:
-        self.ip_util.stack.Install(ns.network.NodeContainer(nodes.Get(int(node_id))))
+        self.ip_util.stack.Install(ns.network.NodeContainer(context.get_node_for_id(node_id)))
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
+
+      for node_id in ues:
+        node = self.ue_nodes[l2id].Get(node_id)
+        context.ip_util.static.GetStaticRouting(ns.cppyy.gbl.getNodeIpv4(node)).SetDefaultRoute(self.epc_helper[l2id].GetUeDefaultGatewayAddress(), 1)
+
       self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
       
       self.enbs += enbs

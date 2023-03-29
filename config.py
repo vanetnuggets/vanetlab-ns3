@@ -26,6 +26,14 @@ CONFIG = {
   },
   "max_at": 204.0,
   "nodes": {
+    "11": {
+      "id": 11,
+      "mobility": {},
+      "l2id": -1,
+      "l2": None,
+      "l2conf": {},
+      "l3": None
+    },
     "1": {
       "id": 1,
       "mobility": {},
@@ -44,7 +52,16 @@ CONFIG = {
       "l2conf": {
         "type": "ue"
       },
-      "l3": None
+      "l3": "udpclient",
+      "l3conf": {
+        "comm": "10",
+        "port": 4444,
+        "start": 0,
+        "stop": 204,
+        "attributes": {
+          "max_packets": 2500
+        }
+      }
     },
     "3": {
       "id": 3,
@@ -54,6 +71,14 @@ CONFIG = {
       "l2conf": {
         "type": "enb"
       },
+      "l3": None
+    },
+    "11": {
+      "id": 11,
+      "mobility": {},
+      "l2id": -1,
+      "l2": None,
+      "l2conf": {},
       "l3": None
     },
     "12": {
@@ -70,6 +95,10 @@ CONFIG = {
       "id": 4,
       "mobility": {},
       "l2id": "1",
+      "attributes": {
+        "RxGain": 32.0,
+        "TxGain": 32.0
+      },
       "l2": "wifi",
       "l2conf": {
         "type": "sta"
@@ -80,7 +109,9 @@ CONFIG = {
         "port": 4242,
         "start": 0,
         "stop": 204,
-        "max_bytes": 2500
+        "attributes": {
+          "max_bytes": 2500
+        }
       }
     },
     "5": {
@@ -132,7 +163,20 @@ CONFIG = {
       "l2": "eth",
       "l2conf": {},
       "l3": None
-    }
+    },
+    "10": {
+      "id": 10,
+      "mobility": {},
+      "l2id": "2",
+      "l2": "eth",
+      "l2conf": {},
+      "l3": "udpserver",
+      "l3conf": {
+        "port": 4444,
+        "start": 0,
+        "stop": 204
+      }
+    },
   },
   "connections": [{
       "node_from": "12",
