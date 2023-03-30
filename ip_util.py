@@ -36,10 +36,14 @@ class IpUtil:
     if 'routing' not in self.config:
       dbg.log(f'no routing protocol specified')
     else:
-      routing = self.config['routing'].lower()
+      routing = self.config['routing']
 
       if routing is not None and routing != "":
-        routing_specified = True
+        try:
+          routing = routing.lower()
+          routing_specified = True
+        except AttributeError as e:
+          pass
     
     if routing_specified and routing not in ['olsr', 'aodv', 'dsdv']:
       dbg.err(f"invalid routing protocol - {routing}")
