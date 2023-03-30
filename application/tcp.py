@@ -1,4 +1,7 @@
-
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from attribute_manager import attribute_manager
+import context
 
 class TcpUtil:
   clients = {}
@@ -14,7 +17,6 @@ class TcpUtil:
     port = int(conf['port'])
     start = int(conf['start'])
     stop = int(conf['stop'])
-    max_bytes = int(conf['max_bytes'])
 
     serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(serv_id)).GetAddress(1,0).GetLocal()
     

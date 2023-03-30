@@ -70,8 +70,8 @@ class LteUtil:
       dbg.log(f'parsed {len(enbs)} enb nodes and {len(ues)} ue nodes in network with id {l2id}.')
       
 
-      self.lte_helper[l2id] = ns.cppyy.gbl.createLteHelper()
-      self.epc_helper[l2id] = ns.lte.PointToPointEpcHelper()
+      self.lte_helper[l2id] = ns.core.CreateObject('LteHelper')
+      self.epc_helper[l2id] = ns.core.CreateObject('PointToPointEpcHelper')
       self.lte_helper[l2id].SetEpcHelper(self.epc_helper[l2id])
       pgw = self.epc_helper[l2id].GetPgwNode()
       pgw_nodes = ns.network.NodeContainer()
@@ -102,9 +102,10 @@ class LteUtil:
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
-      for node_id in ues:
-        node = self.ue_nodes[l2id].Get(node_id)
-        context.ip_util.static.GetStaticRouting(ns.cppyy.gbl.getNodeIpv4(node)).SetDefaultRoute(self.epc_helper[l2id].GetUeDefaultGatewayAddress(), 1)
+      print('TIME TO ATTACH')
+      # for node_id in ues:
+      #   node = self.ue_nodes[l2id].Get(node_id)
+      #   context.ip_util.static.GetStaticRouting(ns.cppyy.gbl.getNodeIpv4(node)).SetDefaultRoute(self.epc_helper[l2id].GetUeDefaultGatewayAddress(), 1)
 
       self.lte_helper[l2id].Attach(self.ue_devs[l2id], self.enb_devs[l2id].Get(0))
       

@@ -59,7 +59,7 @@ CONFIG = {
         "start": 0,
         "stop": 204,
         "attributes": {
-          "max_packets": 2500
+          "MaxPackets": 2500
         }
       }
     },
@@ -110,7 +110,7 @@ CONFIG = {
         "start": 0,
         "stop": 204,
         "attributes": {
-          "max_bytes": 2500
+          "MaxBytes": 2500
         }
       }
     },
