@@ -30,11 +30,15 @@ class IpUtil:
   def _set_routing(self):
     self.list = ns.internet.Ipv4ListRoutingHelper()
     
+    routing_specified = None
+    routing = ""
+
     if 'routing' not in self.config:
-      dbg.log(f'no routing protocol specified, defaulting to `olsr`')
-      routing = 'olsr'
+      dbg.log(f'no routing protocol specified')
+    else:
+      routing = self.config['routing'].lower()
+      routing_specified = True
     
-    routing = self.config['routing'].lower()
     if routing not in ['olsr', 'aodv', 'dsdv']:
       dbg.err(f"invalid routing protocol - {routing}")
       exit(-1)
@@ -50,7 +54,9 @@ class IpUtil:
 
     self.static = ns.internet.Ipv4StaticRoutingHelper()
     self.list.Add(self.static, 0)
-    self.list.Add(self._routing, 100)
+    
+    if routing_specified:
+      self.list.Add(self._routing, 100)
 
     self.stack.SetRoutingHelper(self.list)
     dbg.log(f'installed {routing} routing protocol.')
