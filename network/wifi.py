@@ -83,7 +83,7 @@ class WifiUtil:
       for node_id in aps:
         node = curr_nodes[str(node_id)]
 
-        attribute_manager.install_attributes(node, self.phy)
+        attribute_manager.install_attributes(node['l2conf'], self.phy)
         
         # install device
         ap_dev = self.wifi.Install(self.phy, self.mac, self.ap_nodes[l2id])

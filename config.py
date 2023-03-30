@@ -95,13 +95,13 @@ CONFIG = {
       "id": 4,
       "mobility": {},
       "l2id": "1",
-      "attributes": {
-        "RxGain": 32.0,
-        "TxGain": 32.0
-      },
       "l2": "wifi",
       "l2conf": {
-        "type": "sta"
+        "type": "sta",
+        "attributes": {
+          "RxGain": 32.0,
+          "TxGain": 32.0
+        },
       },
       "l3": "tcpclient",
       "l3conf": {
