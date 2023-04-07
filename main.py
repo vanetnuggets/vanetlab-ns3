@@ -11,6 +11,7 @@ from log_helper import dbg
 from phy_util import PhyUtil
 from ip_util import IpUtil
 from app_util import AppUtil
+from sdn_manager import SdnManager
 
 import context
 
@@ -75,7 +76,6 @@ def main(argv):
   sumo_trace.Install()  
 
   dbg.log('ns2 mobility configured')
-
   context.ip_util = IpUtil(context.config)
 
   context.phy_util = PhyUtil(context.config, context.ip_util)
@@ -86,8 +86,9 @@ def main(argv):
   context.app_util = AppUtil(context.config)
   context.app_util.install(context.nodes)
   
+  SdnManager()
   
-  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml');
+  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
 
   ns.core.Simulator.Stop(ns.core.Seconds(sim_time))
   ns.core.Simulator.Run()
