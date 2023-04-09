@@ -11,6 +11,8 @@ class SdnManager:
                 SdnSwitch(sw_id=node_id)
 
 class SdnSwitch:
+    links = []
+
     def __init__(self, sw_id) -> None:
         self.sw_id = sw_id
         self.config = context.config
@@ -34,15 +36,18 @@ class SdnSwitch:
         # Create the csma links, from each terminal to the switch
         self.terminalDevices = ns.network.NetDeviceContainer()
         self.switchDevices = ns.network.NetDeviceContainer()
-
-        for neighbor in range(len(neighbors_c)):
-            link = csma.Install(ns.network.NodeContainer(ns.network.NodeContainer(neighbor), switch_c))
+        
+        for neighbor in neighbors_c:
+            tmp_cont = ns.NodeContainer()
+            tmp_cont.Add(neighbor)
+            tmp_cont.Add(switch_c)
+            link = csma.Install(tmp_cont)
             self.terminalDevices.Add(link.Get(0))
             self.switchDevices.Add(link.Get(1))
-
+            self.links.append(link)    
+        
         # CREATING SWITCH   
         self.swtch = ns.openflow.OpenFlowSwitchHelper()
-        
         if self.config['nodes'][self.sw_id]['controller'] == 'drop':
             controller = ns.openflow.ofi.DropController()
             self.swtch.Install(switch_c, self.switchDevices, controller)
@@ -53,4 +58,5 @@ class SdnSwitch:
             self.swtch.Install(switch_c, self.switchDevices, controller)
         else:
             dbg.err('you have to specify controller type')
+        
         dbg.log(f'switch_id: {self.sw_id} installed')

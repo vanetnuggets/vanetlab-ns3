@@ -19,7 +19,6 @@ def _init_nodes():
     _nodes_index_map[node_id] = index
   
   dbg.log('initialized id to node index mapping')
-  dbg.log(' -> ', _nodes_index_map)
   
 
 def get_node_for_id(node_id):

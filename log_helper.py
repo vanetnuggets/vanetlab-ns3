@@ -8,8 +8,8 @@ class LogHelper:
   def err(self, msg, *argv):
     print(f'[error] {msg}', *argv)
   
-  # error, but not fatal, just ignoring the failed part
+  # something weird, not fatal but should be noted
   def warn(self, msg, *argv):
-    print(f'[ignore] {msg}', *argv)
+    print(f'[warn] {msg}', *argv)
 
 dbg = LogHelper()

@@ -102,7 +102,6 @@ class LteUtil:
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
-      print('TIME TO ATTACH')
       # for node_id in ues:
       #   node = self.ue_nodes[l2id].Get(node_id)
       #   context.ip_util.static.GetStaticRouting(ns.cppyy.gbl.getNodeIpv4(node)).SetDefaultRoute(self.epc_helper[l2id].GetUeDefaultGatewayAddress(), 1)

@@ -1,11 +1,10 @@
+import sys
 from ns2_node_util import Ns2NodeUtility
-
 from ns import ns
-
 import sys, json
 
 from argparse import ArgumentParser
-from config import CONFIG, MOBILITY_TCL
+from config2 import CONFIG, MOBILITY_TCL
 from log_helper import dbg
 
 from phy_util import PhyUtil
@@ -41,7 +40,6 @@ def main(argv):
   if mobility_file == None:
     mobility_file = MOBILITY_TCL
   
-  print(config, mobility_file, traceloc, validate)
   if config is None:
     context.config = CONFIG
   else:
@@ -56,7 +54,6 @@ def main(argv):
 
   node_util = Ns2NodeUtility(mobility_file)
   nnodes = node_util.get_n_nodes()
-  node_util.print_information()
 
   dbg.log(f'ns2 mobility tcl parsed')
   dbg.log(f'number of nodes: {nnodes}, simulation time: {sim_time}')
@@ -93,7 +90,6 @@ def main(argv):
   ns.core.Simulator.Stop(ns.core.Seconds(sim_time))
   ns.core.Simulator.Run()
   ns.core.Simulator.Destroy()
-
 if __name__ == '__main__':
   main(sys.argv)
-  exit(0)
+  sys.exit(0)
