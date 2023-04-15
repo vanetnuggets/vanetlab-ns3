@@ -23,7 +23,9 @@ def _init_nodes():
 
 def get_node_for_id(node_id):
   index = _nodes_index_map[int(node_id)]
-  return nodes.Get(index)
+  print('getting node', node_id)
+  return nodes.Get(int(node_id))
+  # return nodes.Get(index)
 
 def get_index_for_id(node_id):
   return _nodes_index_map[int(node_id)]

@@ -54,12 +54,14 @@ def main(argv):
 
   node_util = Ns2NodeUtility(mobility_file)
   nnodes = node_util.get_n_nodes()
+  node_util.print_information()
 
   dbg.log(f'ns2 mobility tcl parsed')
   dbg.log(f'number of nodes: {nnodes}, simulation time: {sim_time}')
   
+  t = node_util.get_max_node()
   context.nodes = ns.network.NodeContainer()
-  context.nodes.Create(nnodes)
+  context.nodes.Create(t)
 
   # mobility = ns.mobility.MobilityHelper()
   # mobility.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", ns.core.DoubleValue(0.0), 
@@ -77,16 +79,20 @@ def main(argv):
 
   context.phy_util = PhyUtil(context.config, context.ip_util)
   context.phy_util.install(context.nodes)
+  dbg.log('installed physical layer')
 
   context.ip_util.install_connections()
-  
+  dbg.log('added p2p connections...')
+
   context.app_util = AppUtil(context.config)
   context.app_util.install(context.nodes)
-  
-  SdnManager()
-  
-  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
+  dbg.log('applications installed')
 
+  SdnManager()
+  dbg.log('sdn added')
+
+  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
+  dbg.log('starting simulation')
   ns.core.Simulator.Stop(ns.core.Seconds(sim_time))
   ns.core.Simulator.Run()
   ns.core.Simulator.Destroy()

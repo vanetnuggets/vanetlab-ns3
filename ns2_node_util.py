@@ -36,6 +36,13 @@ class Ns2NodeUtility:
 			start, end = self.node_times[key]
 			print(f"node {key} started at {start} and ended at {end}.")
 
+	def get_max_node(self):
+		i = 0
+		for key in self.node_times:
+			if int(key) > i:
+				i = int(key)
+		return i + 1
+
 	def get_n_nodes(self):
 		return len(self.node_times)
 
