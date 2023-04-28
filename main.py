@@ -99,7 +99,7 @@ def main(argv):
   SdnManager()
   dbg.log('sdn added')
   
-  # anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
+  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
   dbg.log('starting simulation')
   ns.core.Simulator.Stop(ns.core.Seconds(sim_time))
   ns.core.Simulator.Run()
