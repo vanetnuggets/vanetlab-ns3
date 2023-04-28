@@ -13,6 +13,10 @@ from app_util import AppUtil
 from sdn_manager import SdnManager
 
 import context
+import signal
+
+def ezfix(signum, frame):
+    print('som ta chytil ne')
 
 ns.core.LogComponentEnable("UdpEchoClientApplication", ns.core.LOG_LEVEL_INFO)
 ns.core.LogComponentEnable("UdpEchoServerApplication", ns.core.LOG_LEVEL_INFO)
@@ -20,6 +24,7 @@ ns.core.LogComponentEnable("BulkSendApplication", ns.core.LOG_LEVEL_INFO)
 ns.core.LogComponentEnable("PacketSink", ns.core.LOG_LEVEL_INFO)
 
 def main(argv):
+  signal.signal(signal.SIGALRM, ezfix)
   parser = ArgumentParser(
     prog='VanetLab ns3 scenario maker',
     description='complex ns3 scenario maker backend for VanetLab',
@@ -76,22 +81,25 @@ def main(argv):
 
   dbg.log('ns2 mobility configured')
   context.ip_util = IpUtil(context.config)
-
+  
+  dbg.log('installing physical layer...')
   context.phy_util = PhyUtil(context.config, context.ip_util)
   context.phy_util.install(context.nodes)
   dbg.log('installed physical layer')
-
+  
+  dbg.log('installing p2p connections...')
   context.ip_util.install_connections()
   dbg.log('added p2p connections...')
-
+ 
+  dbg.log('installing applications...')
   context.app_util = AppUtil(context.config)
   context.app_util.install(context.nodes)
   dbg.log('applications installed')
 
   SdnManager()
   dbg.log('sdn added')
-
-  anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
+  
+  # anim = ns.netanim.AnimationInterface(f'{traceloc}/trace.xml')
   dbg.log('starting simulation')
   ns.core.Simulator.Stop(ns.core.Seconds(sim_time))
   ns.core.Simulator.Run()

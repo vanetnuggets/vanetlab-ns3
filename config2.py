@@ -4,19 +4,18 @@ CONFIG = {
   "nodes": {
     "0": {
       "id": 0,
-      "l2": "wifi",
+      "l2": "wave",
       "l2conf": {
-        "standard": "802.11n",
-        "type": "ap",
+        "type": "node",
         "attributes": {
-          "RxGain": "64.0",
-          "TxGain": "64.0"
+          "RxGain": "128.0",
+          "TxGain": "128.0"
         }
       },
       "l2id": "0",
       "l3": "udpclient",
       "l3conf": {
-        "port": "100",
+        "port": "2222",
         "start": "1",
         "stop": "10",
         "interval": "1",
@@ -67,10 +66,13 @@ CONFIG = {
     },
     "1": {
       "id": 1,
-      "l2": "wifi",
+      "l2": "wave",
       "l2conf": {
-        "standard": "802.11n",
-        "type": "sta"
+        "type": "node",
+        "attributes": {
+          "RxGain": "128.0",
+          "TxGain": "128.0"
+        }
       },
       "l2id": "0",
       "l3": "udpclient",
@@ -209,10 +211,13 @@ CONFIG = {
     },
     "2": {
       "id": 2,
-      "l2": "wifi",
+      "l2": "wave",
       "l2conf": {
-        "standard": "802.11n",
-        "type": "sta"
+        "type": "node",
+        "attributes": {
+          "RxGain": "128.0",
+          "TxGain": "128.0"
+        }
       },
       "l2id": "0",
       "l3": "udpserver",
@@ -299,10 +304,13 @@ CONFIG = {
     },
     "3": {
       "id": 3,
-      "l2": "wifi",
+      "l2": "wave",
       "l2conf": {
-        "standard": "802.11n",
-        "type": "sta"
+        "type": "node",
+        "attributes": {
+          "RxGain": "128.0",
+         "TxGain": "128.0"
+        }
       },
       "l2id": "0",
       "l3": None,
@@ -463,7 +471,7 @@ CONFIG = {
           "y": 505.8,
           "z": 5.52
         },
-        "64.0": {
+        "128.0": {
           "x": 89.4,
           "y": 511.93,
           "z": 7
@@ -570,10 +578,13 @@ CONFIG = {
     },
     "4": {
       "id": 4,
-      "l2": "wifi",
+      "l2": "wave",
       "l2conf": {
-        "standard": "802.11n",
-        "type": "sta"
+        "type": "node",
+        "attributes": {
+          "RxGain": "128.0",
+          "TxGain": "128.0"
+        }
       },
       "l2id": "0",
       "l3": None,
@@ -714,7 +725,7 @@ CONFIG = {
           "y": 439.63,
           "z": 8.32
         },
-        "64.0": {
+        "128.0": {
           "x": 431.55,
           "y": 442.79,
           "z": 5.84
@@ -944,8 +955,8 @@ CONFIG = {
       "addr": "10.1.1.0/24",
       "color": "#e4ff05",
       "id": "0",
-      "ssid": "wifi",
-      "type": "WIFI"
+      "ssid": "wave",
+      "type": "WAVE"
     }
   },
   "connections": [],

@@ -2,6 +2,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from attribute_manager import attribute_manager
 import context
+from log_helper import dbg 
 
 class UdpUtil:
   clients = {}
@@ -18,7 +19,7 @@ class UdpUtil:
     start = int(conf['start'])
     stop = int(conf['stop'])
 
-    serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(node_id)).GetAddress(1,0).GetLocal()
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(context.get_node_for_id(serv_id)).GetAddress(1,0).GetLocal()
     
     client = ns.applications.UdpEchoClientHelper(serv_addr.ConvertTo(), port)
     
@@ -32,6 +33,7 @@ class UdpUtil:
       's': client,
       'a': app
     }
+    dbg.log(f'installed client: {node_id} -> {serv_id} ({serv_addr}:{port}) [{start}:{stop}]')
   
   def add_server(self, nodes, node, conf):
     node_id = int(node['id'])
@@ -49,3 +51,9 @@ class UdpUtil:
       's': server,
       'a': app
     }
+
+    serv_addr = ns.cppyy.gbl.getNodeIpv4(
+      context.get_node_for_id(node_id)
+    ).GetAddress(1,0).GetLocal()
+
+    dbg.log(f'installed server: {node_id}, {serv_addr}:{port} [{start}:{stop}]')

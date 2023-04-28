@@ -7,6 +7,7 @@ from log_helper import dbg
 from network.eth import EthernetUtil
 from network.lte import LteUtil
 from network.wifi import WifiUtil
+from network.wave import WaveUtil
 
 class PhyUtil:
   def __init__(self, config, ip_util):
@@ -16,7 +17,8 @@ class PhyUtil:
     self.lte_util = LteUtil(self.config, self.ip_util)
     self.wifi_util = WifiUtil(self.config, self.ip_util)
     self.eth_util = EthernetUtil(self.config, self.ip_util)
-
+    self.wave_util = WaveUtil(self.config, self.ip_util)
+    
   def install(self, nodes):
     self.nodes = nodes
 
@@ -28,6 +30,9 @@ class PhyUtil:
 
     dbg.log(f'installing Eth networks...')
     self.eth_util.install(nodes)
+    
+    dbg.log(f'installing Wave networks...')
+    self.wave_util.install(nodes)
   
   def get_devices(self):
     devices = {}
