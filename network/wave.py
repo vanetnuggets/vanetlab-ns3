@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tracehelper import enable_trace
 from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
 from log_helper import dbg
@@ -141,3 +142,6 @@ class WaveUtil:
       dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
       
       dbg.log(f'configured Wave network with id {l2id}')
+
+      enable_trace(self.phy(l2id), self.ssid(l2id))
+

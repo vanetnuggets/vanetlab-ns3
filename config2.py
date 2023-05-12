@@ -1,4 +1,4 @@
-MOBILITY_TCL = '/home/ondro/skola/tp/sumo_to_ns3_py/ns2mobility.tcl'
+MOBILITY_TCL = '/vlns3/ns2mobility.tcl'
 
 CONFIG = {
   "nodes": {

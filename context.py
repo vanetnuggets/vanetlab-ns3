@@ -1,5 +1,6 @@
 from log_helper import dbg
 
+path = '.'
 config = None
 ip_util = None
 phy_util = None

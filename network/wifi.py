@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tracehelper import enable_trace
 from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
 from log_helper import dbg
@@ -184,3 +185,6 @@ class WifiUtil:
       dbg.log(f'configured WIFI network with id {l2id}')
       self.aps += aps
       self.stas += stas
+
+      enable_trace(self.phy(l2id), self.ssid(l2id))
+

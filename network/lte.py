@@ -1,6 +1,7 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from attribute_manager import attribute_manager
+from tracehelper import enable_trace
 from ipaddress import IPv4Network
 from log_helper import dbg
 import context
@@ -110,6 +111,6 @@ class LteUtil:
       
       self.enbs += enbs
       self.ues += ues
-
+      netname = self.netmap[l2id]['ssid']
       dbg.log(f'configured LTE network')
-
+      enable_trace(self.lte_helper[l2id], netname)

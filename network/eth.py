@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tracehelper import enable_trace
 from attribute_manager import attribute_manager
 from ipaddress import IPv4Network
 from log_helper import dbg
@@ -29,6 +30,7 @@ class EthernetUtil:
   def install(self, nodes):
 
     for l2id in self.nodemap:
+      netname = self.netmap[l2id]['ssid']
       l2type = self.netmap[l2id]['type'].lower()
       if l2type != 'eth':
         continue
@@ -66,3 +68,5 @@ class EthernetUtil:
 
       dbg.log(f'assigned address {net_addr} {net_mask} for network {net_name}')
       dbg.log(f'network {net_name} configured.')
+
+      enable_trace(csma, netname)

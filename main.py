@@ -41,6 +41,7 @@ def main(argv):
   config = str(args.config) if args.config is not None else None
   traceloc = str(args.traceloc) if args.traceloc is not None else '.'
   validate = int(args.validate) if args.validate is not None else 0
+  context.path = traceloc
 
   if mobility_file == None:
     mobility_file = MOBILITY_TCL
