@@ -99,7 +99,7 @@ class LteUtil:
       self.ue_devs[l2id] = self.lte_helper[l2id].InstallUeDevice(self.ue_nodes[l2id])
       dbg.log(f'installed {len(ues)} ue nodes in network with id {l2id}')
       for node_id in ues:
-        self.ip_util.stack.Install(ns.network.NodeContainer(context.get_node_for_id(node_id)))
+        self.ip_util.install_stack(node_id)
 
       self.epc_helper[l2id].AssignUeIpv4Address(self.ue_devs[l2id])
 
@@ -113,4 +113,7 @@ class LteUtil:
       self.ues += ues
       netname = self.netmap[l2id]['ssid']
       dbg.log(f'configured LTE network')
-      enable_trace(self.lte_helper[l2id], netname)
+
+      self.lte_helper[l2id].EnableTraces()
+
+      # enable_trace(self.lte_helper[l2id], netname)

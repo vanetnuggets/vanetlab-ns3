@@ -173,3 +173,11 @@ class IpUtil:
       node_to = conn['node_to']
 
       self.connect(int(node_from), int(node_to))
+
+  def install_stack(self, node_id):
+    if int(node_id) in context.ip_stack_on:
+      dbg.warn(f'ip stack already installed on node {node_id}')
+      return
+
+    context.ip_stack_on.add(int(node_id))
+    self.stack.Install(ns.network.NodeContainer(context.get_node_for_id(int(node_id))))

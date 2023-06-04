@@ -6,6 +6,8 @@ ip_util = None
 phy_util = None
 app_util = None
 nodes = None
+
+ip_stack_on = set()
 _nodes_index_map = {}
 
 def _init_nodes():

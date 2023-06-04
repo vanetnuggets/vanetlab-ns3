@@ -123,8 +123,8 @@ class WaveUtil:
 
       # Install IP stack
       for node_id in curr_nodes:
-        self.ip_util.stack.Install(ns.network.NodeContainer(context.get_node_for_id(node_id)))
-      
+        self.ip_util.install_stack(node_id)
+
       addr = self.netmap[l2id]['addr']
 
       net_addr = IPv4Network(addr).network_address 
